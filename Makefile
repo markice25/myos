@@ -1,7 +1,7 @@
 CC = arm-linux-gnueabi-gcc
 CFLAGS = -static -c -O2 -nostdlib -fno-builtin -fno-stack-protector -fno-PIC -march=armv7-a -mfloat-abi=soft -std=c99 -Wall
 
-OBJS = obj/boot.o obj/start.o obj/printf.o obj/vm.o
+OBJS = obj/boot.o obj/start.o obj/printf.o obj/vm.o obj/buddy.o
 
 .PHONY: all clean qemu
 
@@ -20,6 +20,9 @@ obj/printf.o: src/printf.c src/*.h
 	$(CC) $(CFLAGS) -o $@ $<
 
 obj/vm.o: src/vm.c src/*.h
+	$(CC) $(CFLAGS) -o $@ $<
+	
+obj/buddy.o: src/buddy.c src/*.h
 	$(CC) $(CFLAGS) -o $@ $<
 
 clean:

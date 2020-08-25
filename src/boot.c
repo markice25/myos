@@ -1,6 +1,7 @@
 #include "printf.h"
 
 extern void start_paging();
+extern void test();
 
 int main()
 {
@@ -35,6 +36,8 @@ int main()
     printk("print 234523 as decimal %d",234523);
     printk("print a as char %c", 'a');
     start_paging();
+    test();
     while (1);
+
 }
 
