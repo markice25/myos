@@ -109,21 +109,23 @@ struct l2table {
 } __attribute__((packed, aligned(4)));
 
 
-static uint8_t pool[40 * 1024];
+//static uint8_t pool[40 * 1024];
 
-static struct l1table *kernel_l1table;
-static struct l2table *kernel_l2table;
+static struct l1table *kernel_l1table = 0;
+//static struct l2table *kernel_l2table;
 
 static void alloc_page_table()
 {
-    unsigned long addr = (void *)pool;
-    if (addr & 0x3FFFul) {
-        addr += 0x4000ul;
-        addr &= ~0x3FFFul;
-    }
+/*    unsigned long addr = (void *)pool;*/
+/*    if (addr & 0x3FFFul) {*/
+/*        addr += 0x4000ul;*/
+/*        addr &= ~0x3FFFul;*/
+/*    }*/
+/*    */
+/*    kernel_l1table = (void *)addr;*/
+/*    kernel_l2table = (void *)(addr + 0x4000ul);*/
     
-    kernel_l1table = (void *)addr;
-    kernel_l2table = (void *)(addr + 0x4000ul);
+    kernel_l1table = alloc_page(2);
 }
 
 /*            uint32_t     present         : 1;*/
@@ -140,6 +142,37 @@ static void alloc_page_table()
 /*            l1entry->block.cacheable = cache;*/
 /*            l1entry->block.cache_inner = l1entry->block.cache_outer = 0x1;*/
 
+void map_page(struct l1table *l1, unsigned long vaddr, unsigned long paddr)
+{
+    int vpn1 = vaddr >> 20;
+    int vpn2 = (vaddr >> 12) & 0xFFul;
+    
+    struct l1page_table_entry *entry= &l1->entries[vpn1];
+    struct l2table *l2 = 0;
+    if (!entry->pte.present)
+    {
+        l2 = alloc_page(0);
+        entry->value = 0;
+        entry->pte.present = 1;
+        entry->pte.pfn = (unsigned long)l2 >> 12;
+    }
+    else
+    {
+        l2 = entry->pte.pfn << 12; 
+    }
+    
+    struct l2page_table_entry *l2entry = &l2->entries[vpn2];
+    l2entry->value = 0;
+    l2entry->present = 1;
+    l2entry->pfn = paddr >> 12;
+    l2entry->no_exec = 1;
+    l2entry->read_only = 0;
+    l2entry->user_access = 0;
+    l2entry->user_write = 1;
+    l2entry->cacheable = 0;
+    l2entry->cache_inner = l2entry->cache_outer = 0x1;
+} 
+
 static void construct_page_table()
 {
     for (int i = 0; i < 512; i++) {
@@ -152,22 +185,32 @@ static void construct_page_table()
         entry->block.bfn = i;
     }
     
-    struct l1page_table_entry *l1entry = &kernel_l1table->entries[512];
-    l1entry->value = 0;
-    l1entry->pte.present = 1;
-    l1entry->pte.pfn = (unsigned long)kernel_l2table >> 12;
+    for (int i = 512; i < 4096; i++) {
+        kernel_l1table->entries[i].value = 0;
+    }
     
-    struct l2page_table_entry *l2entry = &kernel_l2table->entries[0];
-    l2entry->value = 0;
-    l2entry->present = 1;
-    l2entry->pfn = 0x3F201;
-    l2entry->no_exec = 1;
-    l2entry->read_only = 0;
-    l2entry->user_access = 0;
-    l2entry->user_write = 1;
-    l2entry->cacheable = 0;
-    l2entry->cache_inner = l2entry->cache_outer = 0x1;
+/*    kernel_l2table = alloc_page(0);*/
+/*    */
+/*    struct l1page_table_entry *l1entry = &kernel_l1table->entries[512];*/
+/*    l1entry->value = 0;*/
+/*    l1entry->pte.present = 1;*/
+/*    l1entry->pte.pfn = (unsigned long)kernel_l2table >> 12;*/
+/*    */
+/*    struct l2page_table_entry *l2entry = &kernel_l2table->entries[0];*/
+/*    l2entry->value = 0;*/
+/*    l2entry->present = 1;*/
+/*    l2entry->pfn = 0x3F201;*/
+/*    l2entry->no_exec = 1;*/
+/*    l2entry->read_only = 0;*/
+/*    l2entry->user_access = 0;*/
+/*    l2entry->user_write = 1;*/
+/*    l2entry->cacheable = 0;*/
+/*    l2entry->cache_inner = l2entry->cache_outer = 0x1;*/
+    
+    map_page(kernel_l1table, 0x20000000ul, 0x3F201000ul);
 }
+
+
 
 static void start_mmu()
 {
@@ -198,7 +241,7 @@ extern unsigned long pl011_base;
 void start_paging()
 {
     printk("l1 @ %h\n", &kernel_l1table);
-    printk("l2 @ %h\n", &kernel_l2table);
+    //printk("l2 @ %h\n", &kernel_l2table);
     alloc_page_table();
     construct_page_table();
     start_mmu();

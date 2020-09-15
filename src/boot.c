@@ -1,7 +1,8 @@
 #include "printf.h"
-
+#include "math.h"
+#include "buddy.h"
 extern void start_paging();
-extern void test();
+extern void mem_test();
 
 int main()
 {
@@ -33,11 +34,13 @@ int main()
 /*    r = 0;*/
 /*    div32(923,9,&q,&r);*/
 /*    printk("923/9:quotient:%b\n, remainder:%b\n",q,r);*/
-    printk("print 234523 as decimal %d",234523);
-    printk("print a as char %c", 'a');
+    init_buddy();
     start_paging();
-    test();
-    while (1);
+
+    //mem_test();
+
+    
+    
 
 }
 

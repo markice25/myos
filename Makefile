@@ -1,7 +1,7 @@
 CC = arm-linux-gnueabi-gcc
 CFLAGS = -static -c -O2 -nostdlib -fno-builtin -fno-stack-protector -fno-PIC -march=armv7-a -mfloat-abi=soft -std=c99 -Wall
 
-OBJS = obj/boot.o obj/start.o obj/printf.o obj/vm.o obj/buddy.o
+OBJS = obj/boot.o obj/start.o obj/printf.o obj/vm.o obj/buddy.o obj/math.o obj/mem_test.o
 
 .PHONY: all clean qemu
 
@@ -16,6 +16,9 @@ obj/start.o: src/start.S
 obj/boot.o: src/boot.c src/*.h
 	$(CC) $(CFLAGS) -o $@ $<
 
+obj/math.o: src/math.c src/*.h
+	$(CC) $(CFLAGS) -o $@ $<
+
 obj/printf.o: src/printf.c src/*.h
 	$(CC) $(CFLAGS) -o $@ $<
 
@@ -23,6 +26,9 @@ obj/vm.o: src/vm.c src/*.h
 	$(CC) $(CFLAGS) -o $@ $<
 	
 obj/buddy.o: src/buddy.c src/*.h
+	$(CC) $(CFLAGS) -o $@ $<
+	
+obj/mem_test.o: src/mem_test.c src/*.h
 	$(CC) $(CFLAGS) -o $@ $<
 
 clean:

@@ -1,4 +1,5 @@
 #include "stdarg.h"
+#include "math.h"
 
 
 #define BCM2835_BASE            (0x3f000000ul)
@@ -26,7 +27,8 @@ static void print_binary(unsigned int num)
 {
     raspi2_putchar('0');
     raspi2_putchar('b');
-    for (int i = 0; i <32; i++)
+    ;
+    for (unsigned int i = clz32(num); i < 32; i++)
     {
         unsigned int temp = num << i >> 31;
         raspi2_putchar(temp+48);
@@ -34,34 +36,7 @@ static void print_binary(unsigned int num)
     
 }
 
-static void div32(unsigned int divident, unsigned int divisor, unsigned int *quotient, unsigned int *remainder)
-{
-    int n = 0;
-    while (divident > divisor)
-    {
-        divisor = divisor << 1;
-        n++;
-    }
-/*    print_binary(divident);*/
-/*    raspi2_putchar(10);*/
-/*    print_binary(divisor);*/
-/*    raspi2_putchar(10);*/
-    while(divident > 0 && n >= 0)
-    {
-/*        print_binary(divident);*/
-/*        raspi2_putchar(10);*/
-/*        print_binary(divisor);*/
-/*        raspi2_putchar(10);*/
-        if(divident >= divisor)
-        {
-            *quotient += (1u << n);
-            divident -= divisor;
-        }
-        divisor = divisor >> 1;
-        n--;
-    }
-    *remainder = divident;
-}
+
 
 static void print_dec(unsigned int num)
 {
@@ -69,13 +44,22 @@ static void print_dec(unsigned int num)
         1000000u, 100000u, 10000u, 1000u, 100u, 10u, 1u };
     unsigned int q = 0;
     unsigned int r = 0;
+    int flag = 0;
     for (int i = 0; i < 10; i++)
     {
         q = 0;
         r = 0;
         div32(num, divisor[i], &q, &r);
-        raspi2_putchar(q+48);
         num = r;
+        flag = (q !=0 || flag != 0) ? 1 : 1;
+        if (flag == 0)
+        {
+            continue;
+        }
+        else
+        {
+            raspi2_putchar(q+48);
+        }
     }
 }
 
@@ -86,10 +70,10 @@ static void print_hex32(unsigned int num)
     for (int i = 0; i < 8; i++){
         char temp =(char) (num << (i << 2) >>28);
         if (temp < 10){
-        raspi2_putchar(temp+48);
+            raspi2_putchar(temp+48);
         }
         else{
-        raspi2_putchar(temp+55);
+            raspi2_putchar(temp+55);
         }
 /*        print_binary(num << (i << 2) >>28);*/
 /*        raspi2_putchar(10);*/
