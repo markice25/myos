@@ -284,6 +284,13 @@ void free_page(unsigned long address)
     _free_page(real_addr_to_page_addr(address));
 }
 
+int cal_order(unsigned int size)
+{
+    int order;
+    for (order = 0; order < 13; order++){
+        if (size <= (2 << (12 + i))) return order;
+    }
+}
 void init_buddy()
 {
     init_page_array();
