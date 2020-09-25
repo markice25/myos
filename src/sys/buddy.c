@@ -288,9 +288,11 @@ int cal_order(unsigned int size)
 {
     int order;
     for (order = 0; order < 13; order++){
-        if (size <= (2 << (12 + i))) return order;
+        if (size <= (1 << (12 + order))) return order;
     }
+    return order;
 }
+
 void init_buddy()
 {
     init_page_array();

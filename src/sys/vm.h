@@ -1,6 +1,8 @@
 #ifndef __VM_H__
 #define __VM_H__
 
+#include <stdint.h>
+
 #define PAGE_LEVELS                 2
 
 #define L1PAGE_TABLE_SIZE           16384
@@ -19,6 +21,8 @@
 #define GET_L1PTE_INDEX(addr)       ((addr) >> 20)
 #define GET_L2PTE_INDEX(addr)       (((addr) >> 12) & 0xfful)
 #define GET_PAGE_OFFSET(addr)       ((addr) & 0xffful)
+
+
 
 struct l1page_table_entry {
     union {

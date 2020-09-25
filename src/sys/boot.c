@@ -1,8 +1,10 @@
 #include "printf.h"
 #include "math.h"
 #include "buddy.h"
+
 extern void start_paging();
 extern void mem_test();
+extern void init_proc();
 
 int main()
 {
@@ -36,7 +38,7 @@ int main()
 /*    printk("923/9:quotient:%b\n, remainder:%b\n",q,r);*/
     init_buddy();
     start_paging();
-
+    init_proc();
     //mem_test();
 
     
